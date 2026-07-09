@@ -61,4 +61,40 @@ if submit:
             st.metric("次日预测方向", direction)
         
         st.line_chart(df['Close'])
+        # --- 新增：AI 分析逻辑 ---
+        st.divider()
+        st.subheader("🤖 AI 结合新闻研判")
+        
+        # 1. 增加一个输入 API Key 的区域 (在侧边栏加一个输入框)
+        api_key = st.sidebar.text_input("请输入 DeepSeek API Key:", type="password")
+        
+        if api_key:
+            with st.spinner("AI 正在根据新闻与指标深度思考..."):
+                from openai import OpenAI
+                
+                # 获取新闻
+                stock = yf.Ticker(ticker)
+                news = stock.news
+                news_text = "\n".join([item.get('title', '') for item in news[:5]])
+                
+                # 调用 AI
+                client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+                prompt = f"""
+                分析股票 {ticker}：
+                1. 量化模型预测结果：{"看涨" if prediction[0] == 1 else "看跌"}
+                2. 最新新闻：{news_text}
+                3. 技术指标：RSI={df['RSI'].iloc[-1]:.2f}
+                
+                请给出简洁的投资建议，包括看涨/看跌的逻辑理由。
+                """
+                
+                response = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=[{"role": "user", "content": prompt}]
+                )
+                
+                # 网页显示 AI 结果
+                st.write(response.choices[0].message.content)
+        else:
+            st.warning("请在左侧边栏输入 API Key 以查看 AI 深度研判。")
         st.success("分析完成！")
