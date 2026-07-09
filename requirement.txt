@@ -1,1 +1,7 @@
-streamlit, yfinance, pandas, numpy, ta, scikit-learn, openai
+streamlit
+yfinance
+pandas
+numpy
+ta
+scikit-learn
+openai
