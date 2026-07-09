@@ -66,11 +66,16 @@ if submit:
         st.subheader("🤖 AI 结合新闻研判")
         
         # 1. 增加一个输入 API Key 的区域 (在侧边栏加一个输入框)
-        try:
-            api_key = st.secrets["OPENAI_API_KEY"]
-        except:
-            st.error("未在后台检测到 API Key，请联系管理员。")
-            st.stop() # 如果没 Key，直接停止运行
+        st.subheader("🤖 AI 深度研判")
+        with st.spinner("AI 正在分析..."):
+            # 获取后台设置的 API Key
+            try:
+                key = st.secrets["OPENAI_API_KEY"]
+                # 这里的函数调用，就是在网页上执行 AI 分析的时刻！
+                ai_result = get_ai_news_analysis(ticker, key, latest_close, latest_rsi)
+                st.write(ai_result) 
+            except KeyError:
+                st.error("请在 Streamlit Cloud 的 Secrets 设置中配置 OPENAI_API_KEY")
         
         if api_key:
             with st.spinner("AI 正在根据新闻与指标深度思考..."):
